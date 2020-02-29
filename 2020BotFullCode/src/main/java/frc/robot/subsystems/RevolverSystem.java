@@ -10,6 +10,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -20,6 +21,7 @@ public class RevolverSystem extends SubsystemBase {
   private PIDController m_pidController;
   private AnalogInput m_potentiometer = new AnalogInput(Constants.kPotChannel);
   private WPI_TalonSRX m_revolverMotor = new WPI_TalonSRX(Constants.kRevolverMotor);
+  private DigitalInput m_rampSwitch = new DigitalInput(Constants.kLimitSwitchRamp);
 
   public boolean[] chamberStatus = new boolean[4];
   private double kP = Constants.RevolverPID.P;
@@ -30,13 +32,12 @@ public class RevolverSystem extends SubsystemBase {
 
   public RevolverSystem() {
 
+    setDefaultCommand(new RevolverOperator());
+
     m_pidController = new PIDController(kP, kI, kD);
 
     m_revolverMotor.configFactoryDefault();
     m_revolverMotor.setInverted(false);
-
-    m_revolverMotor.setSensorPhase(true);
-    
   }
 
   public void setTarget(double target) {
@@ -47,17 +48,18 @@ public class RevolverSystem extends SubsystemBase {
     return fixedPot;
   }
 
+  public boolean getLS() {
+    return m_rampSwitch.get();
+  }
+
   @Override
   public void periodic() {
     
-    fixedPot = ((60 - Math.exp(m_potentiometer.getAverageVoltage())) * (Math.PI / 55) - Math.PI) / 2;
+    fixedPot = m_potentiometer.getAverageVoltage() * 100;
 
     pidOut = m_pidController.calculate(fixedPot);
     m_revolverMotor.set(pidOut);
 
   }
 
-  public void initDefaultCommand() {
-    setDefaultCommand(new RevolverOperator());
-  }
 }

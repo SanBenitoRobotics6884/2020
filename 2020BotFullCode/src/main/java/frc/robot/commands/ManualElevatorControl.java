@@ -7,27 +7,19 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
-public class ArcadeDrive extends CommandBase {
+public class ManualElevatorControl extends CommandBase {
   
-  private XboxController m_controller = new XboxController(Constants.kControllerChannel);
+  private boolean isFinished = false;
 
-  double m_joystickForward;
-  double m_joystickReverse;
-  double m_joystickTurn;
+  private Joystick m_joystick = new Joystick(Constants.kJoystickChannel);
 
-  double m_speed;
-  boolean isFinished = false;
-
-  public ArcadeDrive() {
-
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.driveSystem);
-
+  public ManualElevatorControl() {
+    addRequirements(RobotContainer.elevatorSystem);
   }
 
   // Called when the command is initially scheduled.
@@ -39,13 +31,12 @@ public class ArcadeDrive extends CommandBase {
   @Override
   public void execute() {
 
-    m_joystickForward = m_controller.getRawAxis(Constants.kDriveForwardAxis);
-    m_joystickReverse = m_controller.getRawAxis(Constants.kDriveReverseAxis);
-    m_joystickTurn = m_controller.getRawAxis(Constants.kDriveTurnAxis);
+    if (RobotContainer.elevatorSystem.isManual()) {
 
-    m_speed = m_joystickForward - m_joystickReverse;
+      RobotContainer.elevatorSystem.setLSpeed(m_joystick.getY());
+      RobotContainer.elevatorSystem.setRSpeed(m_joystick.getY());
 
-    RobotContainer.driveSystem.ArcadeDrive(m_speed, m_joystickTurn);
+    }
   }
 
   // Called once the command ends or is interrupted.

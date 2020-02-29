@@ -26,9 +26,16 @@ public final class Constants {
     public static final double kDriveSpeedDefault = 0.5;
     public static final double kIntakeSpeed = 0.4;
     public static final double kLauncherSpeed = 0.5;
+    public static final double kLSUpdateDelay = 1;
+    public static final double kEjectorSpeed = 0.1;
+    public static final double kAutoEjectDelay = 2;
+    public static final double kLiftSpeed = 0.5;
+    public static final double kControlPanelSpeed = 0.2;
+    public static final boolean kLiftServoDefaultState = false;
 
     //Controllers & Input
-    public static final int kDriveControllerChannel = 0;
+    public static final int kControllerChannel = 1;
+    public static final int kJoystickChannel = 0;
     public static final int kDriveForwardAxis = 3;
     public static final int kDriveReverseAxis = 2;
     public static final int kDriveTurnAxis = 0;
@@ -37,18 +44,32 @@ public final class Constants {
     public static final int kRightBumper = 6;
     public static final int kButtonA = 1;
     public static final int kButtonB = 2;
+    public static final int kJoystickTrigger = 1;
+    public static final int kJoystickButton11 = 11;
+    public static final int kControlPanelDirectAxis = 4;
 
     //Motor Controller Channels
-    public static final int kLeftDriveMaster = 2; //Talon SRX
-    public static final int kLeftDriveFollower = 20; //Victor SPX
-    public static final int kRightDriveMaster = 1; //Talon SRX
-    public static final int kRightDriveFollower = 10; // Victor SPX
-    public static final int kIntakeMotor = 3; // Victor SPX
+    public static final int kLeftDriveMaster = 2; //Talon SRX, CAN
+    public static final int kLeftDriveFollower = 20; //Victor SPX, CAN
+    public static final int kRightDriveMaster = 1; //Talon SRX, CAN
+    public static final int kRightDriveFollower = 10; // Victor SPX, CAN
+    public static final int kIntakeMotor = 3; // Victor SPX, CAN
     public static final int kRevolverMotor = 4;
     public static final int kLauncherMotor = 5;
+    public static final int kEjectorMotor = 6;
+    public static final int kLiftMotorLeft = 7;
+    public static final int kLiftMotorRight = 8;
+    public static final int kLiftServoLeft = 0; //Servo, PWM
+    public static final int kLiftServoRight = 1; //Servo, PWM
+    public static final int kControlPanelMotor = 9;
 
     //Sensor Channels
-    public static final int kPotChannel = 1; //Potentiometer
+    public static final int kPotChannel = 0; //Potentiometer, Analog Input
+    public static final int kLimitSwitchRamp = 0; //Limit Switch, DIO (Digital Input/Output)
+    public static final int kLimitSwitchEjectorMax = 1; //Limit Switch, DIO (Digital Input/Output)
+    public static final int kLimitSwitchEjectorMin = 2; //Limit Switch, DIO (Digital Input/Output)
+    public static final int kLimitSwitchLiftMinLeft = 3; //Limit Switch, DIO (Digital Input/Output)
+    public static final int kLimitSwitchLiftMinRight = 4; //Limit Switch, DIO (Digital Input/Output)
 
     //PID Constants
     public static final class GyroPID {
@@ -64,11 +85,11 @@ public final class Constants {
     }
 
     public static final class RevolverPID { //TUNE BEFORE USE
-        public static final double P = 0.05;
+        public static final double P = 0.01;
         public static final double I = 0.0;
         public static final double D = 0.0;
-        public static final double[] kIntakeSetPoints = {1, 1, 1, 1, 1}; //FIND SETPOINTS BEFORE USE
-        public static final double[] kLauncherSetPoints = {1, 1, 1, 1, 1}; //FIND SETPOINTS BEFORE USE
+        public static final double[] kIntakeSetPoints = {167, 177, 186, 196, 206}; //FIND SETPOINTS BEFORE USE
+        public static final double[] kLauncherSetPoints = {197, 207, 217, 227, 237}; //FIND SETPOINTS BEFORE USE
     }
 
 }

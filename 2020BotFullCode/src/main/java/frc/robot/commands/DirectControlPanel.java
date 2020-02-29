@@ -7,27 +7,17 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 
-public class ArcadeDrive extends CommandBase {
+public class DirectControlPanel extends CommandBase {
   
-  private XboxController m_controller = new XboxController(Constants.kControllerChannel);
-
-  double m_joystickForward;
-  double m_joystickReverse;
-  double m_joystickTurn;
-
-  double m_speed;
-  boolean isFinished = false;
-
-  public ArcadeDrive() {
-
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.driveSystem);
-
+  private Joystick m_joystick = new Joystick(Constants.kControllerChannel);
+  
+  public DirectControlPanel() {
+    addRequirements(RobotContainer.controlPanelSystem);
   }
 
   // Called when the command is initially scheduled.
@@ -39,13 +29,7 @@ public class ArcadeDrive extends CommandBase {
   @Override
   public void execute() {
 
-    m_joystickForward = m_controller.getRawAxis(Constants.kDriveForwardAxis);
-    m_joystickReverse = m_controller.getRawAxis(Constants.kDriveReverseAxis);
-    m_joystickTurn = m_controller.getRawAxis(Constants.kDriveTurnAxis);
-
-    m_speed = m_joystickForward - m_joystickReverse;
-
-    RobotContainer.driveSystem.ArcadeDrive(m_speed, m_joystickTurn);
+    RobotContainer.controlPanelSystem.directControl(m_joystick.getRawAxis(Constants.kControlPanelDirectAxis));
   }
 
   // Called once the command ends or is interrupted.
@@ -56,6 +40,6 @@ public class ArcadeDrive extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return isFinished;
+    return false;
   }
 }

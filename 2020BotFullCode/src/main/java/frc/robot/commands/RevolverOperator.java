@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -17,36 +18,52 @@ public class RevolverOperator extends CommandBase {
   private boolean[] m_chamberStatus;
   private double[] kIntakeSetPoints = Constants.RevolverPID.kIntakeSetPoints; 
   private double[] kLauncherSetPoints = Constants.RevolverPID.kLauncherSetPoints;
-  private double m_currentAngle;
+  private double m_fixedPot;
+  private int m_chamberTarget = 0;
+  private double updateStatusTime = Constants.kLSUpdateDelay;
+  private boolean lsPressed = false;
+  private Timer m_timer = new Timer();
 
   private double findTargetChamberAngle (boolean targetLauncher, double currentAngle) {
 
-    m_currentAngle = RobotContainer.revolverSystem.getPotAngle();
-    m_chamberStatus = RobotContainer.revolverSystem.chamberStatus;
     int returnChamber = 0;
-    double returnAngle;
+    double returnAngle = 0;
 
-    for (int i = 0; i <= m_chamberStatus.length; i++) {
+    for (int i = 0; i < m_chamberStatus.length; i++) {
+
       if (targetLauncher) {
-        if ( (kLauncherSetPoints[returnChamber] - currentAngle) < (kLauncherSetPoints[i] - currentAngle)
+
+        if ( !m_chamberStatus[returnChamber] && m_chamberStatus[i] ) {
+          returnChamber = i;
+        }
+
+        if ( Math.abs(kLauncherSetPoints[returnChamber] - currentAngle) > Math.abs(kLauncherSetPoints[i] - currentAngle)
         && m_chamberStatus[i]) {
           returnChamber = i;
         }
+
       } else {
-        if ( (kIntakeSetPoints[returnChamber] - currentAngle) < (kIntakeSetPoints[i] - currentAngle)
+
+        if ( m_chamberStatus[returnChamber] && !m_chamberStatus[i] ) {
+          returnChamber = i;
+        }
+
+        if ( Math.abs(kIntakeSetPoints[returnChamber] - currentAngle) > Math.abs(kIntakeSetPoints[i] - currentAngle)
         && !m_chamberStatus[i]) {
           returnChamber = i;
         }
+
       }
+
+      if (targetLauncher) {
+        returnAngle = kLauncherSetPoints[returnChamber];
+      } else {
+        returnAngle = kIntakeSetPoints[returnChamber];
+      }
+
     }
 
-    if (targetLauncher) {
-      returnAngle = kLauncherSetPoints[returnChamber];
-    } else {
-      returnAngle = kIntakeSetPoints[returnChamber];
-    }
-
-    return returnAngle;
+      return returnAngle;
 
   }
 
@@ -58,16 +75,29 @@ public class RevolverOperator extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    m_timer.start();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+
+    m_fixedPot = RobotContainer.revolverSystem.getPotAngle();
     
-    if (RobotContainer.intakeSystem.getStatus()) {
-      RobotContainer.revolverSystem.setTarget(findTargetChamberAngle(false, m_currentAngle));
+    if (RobotContainer.intakeSystem.getStatus() && RobotContainer.launcherSystem.isHome()) {
+      RobotContainer.revolverSystem.setTarget(findTargetChamberAngle(false, m_fixedPot));
     } else {
-      RobotContainer.revolverSystem.setTarget(findTargetChamberAngle(true, m_currentAngle));
+      RobotContainer.revolverSystem.setTarget(findTargetChamberAngle(true, m_fixedPot));
+    }
+
+    if(RobotContainer.revolverSystem.getLS()) {
+      lsPressed = true;
+      updateStatusTime = m_timer.get() + 1;
+    }
+
+    if (lsPressed && m_timer.get() > updateStatusTime) {
+      lsPressed = false;
+      m_chamberStatus[m_chamberTarget] = true;
     }
 
   }
