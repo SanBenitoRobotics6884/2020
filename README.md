@@ -1,6 +1,6 @@
 # 2020
 
-All code for FRC 6884 Deep-Space. This includes the full competition code as well as individual test projects. For each project, the java files are located in '*ProjectName*/src/main/java/frc/robot/'. All code is written in Java.
+All code for FRC 6884 Deep-Space. This includes the full competition code as well as individual test projects. For each project, the java files are located in `ProjectName/src/main/java/frc/robot/`. All code is written in Java.
 
 ## Setup Instructions
 
