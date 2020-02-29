@@ -1,10 +1,12 @@
 # 2020
 
-Getting Started
-----------------
-[Install wpilib](https://docs.wpilib.org/en/latest/docs/getting-started/getting-started-frc-control-system/wpilib-setup.html)
+## Getting Started
+All code for FRC 6884 Deep-Space. This includes the full competition code as well as individual test projects.
 
+## Setup Instructions
 
+1. Clone this repository
+2. Navigate to the directory of the target project (i.e. )
 
 
 Notes
