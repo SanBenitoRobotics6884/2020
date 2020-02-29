@@ -27,7 +27,6 @@ All code for FRC 6884 Deep-Space. This includes the full competition code as wel
 - **m_** - (i.e. `m_leftMotor`): Used for private variables
 
 ## Resources
-=======
 - [WPILib Documentation](https://docs.wpilib.org/en/latest/): In-Depth Documentation for WPI Libraries
 - [Chief Delphi](https://www.chiefdelphi.com/): Helpful FRC Forum
 - [Limelight Documentation](https://docs.limelightvision.io/en/latest/): Documentation for Limelight Vision Camera
