@@ -7,52 +7,30 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.DriveSystem;
 
-public class GyroDrive extends CommandBase {
+public class AutoLaunch extends CommandBase {
   
-  private XboxController m_controller = new XboxController(Constants.kControllerChannel);
-
-  private double m_joystickForward;
-  private double m_joystickReverse;
-  private double m_speed;
-  private double m_turnAngle;
-  private boolean m_fieldCentric;
   private boolean isFinished = false;
+  private boolean m_targetStatus;
 
-  public GyroDrive(boolean fieldCentric) {
-
+  public AutoLaunch(boolean targetStatus) {
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(RobotContainer.driveSystem);
 
+    m_targetStatus = targetStatus;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    RobotContainer.launcherSystem.setAutoLaunch(m_targetStatus);
+    isFinished = true;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-
-    if (m_fieldCentric) {
-      m_turnAngle = DriveSystem.calculateJoystickAngle(m_controller.getRawAxis(Constants.kDriveTurnAxis),
-        m_controller.getRawAxis(Constants.kDriveTurnVerticalAxis));
-    } else {
-      m_turnAngle = (m_controller.getRawAxis(Constants.kDriveTurnAxis) * Constants.kGyroDriveTurnGain) % 360;
-    }
-
-    m_joystickForward = m_controller.getRawAxis(Constants.kDriveForwardAxis);
-    m_joystickReverse = m_controller.getRawAxis(Constants.kDriveReverseAxis);
-
-    m_speed = m_joystickForward - m_joystickReverse;
-
-    RobotContainer.driveSystem.ArcadeDrive(m_speed, m_turnAngle);
   }
 
   // Called once the command ends or is interrupted.

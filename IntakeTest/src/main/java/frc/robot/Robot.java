@@ -8,7 +8,6 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -23,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-  private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(10);
+  private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(3);
   //private Spark m_motor2 = new Spark(1);
   private Joystick m_controller = new Joystick(0);
   double m_speedCoefficient = 0.7;
@@ -55,8 +54,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
    // if (psController.getRawAxis(4) > 0) m_motor2.set(-psController.getRawAxis(4));
-    if (m_controller.getRawAxis(3) > 0) {
-      m_intakeMotor.set(( 1 - m_controller.getRawAxis(3) ) * m_speedCoefficient);
+    if (m_controller.getY() > 0) {
+      m_intakeMotor.set(m_controller.getY() * m_speedCoefficient);
     } else {
       m_intakeMotor.set(0);
     }

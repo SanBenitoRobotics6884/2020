@@ -8,10 +8,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
-
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -22,10 +21,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-  private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(20);
-  //private Spark m_motor2 = new Spark(1);
   private Joystick m_controller = new Joystick(0);
-  double k_speedCoefficient = 0.3;
+  private Servo actuator = new Servo(0);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -33,10 +30,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    System.out.println("test");
-    m_intakeMotor.configFactoryDefault();
-    m_intakeMotor.setInverted(false);
-    m_intakeMotor.setSensorPhase(true);
+    actuator.setBounds(2.0, 1.8, 1.5, 1.2, 1.0);
   }
 
   @Override
@@ -53,14 +47,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-   // if (psController.getRawAxis(4) > 0) m_motor2.set(-psController.getRawAxis(4));
-    if (m_controller.getRawAxis(3) > 0) {
-      m_intakeMotor.set(m_controller.getRawAxis(3) * k_speedCoefficient);
-    } else {
-      m_intakeMotor.set(0);
-    }
 
-    SmartDashboard.putNumber("Controller Axis 3", m_controller.getRawAxis(3));
+    if (m_controller.getTrigger()) {
+      actuator.setSpeed(1);
+    } else {
+      actuator.setSpeed(-1);
+    }
 
   }
 

@@ -68,6 +68,9 @@ public class DriveSystem extends SubsystemBase {
   }
 
   public DriveSystem() {
+    
+    setDefaultCommand(new ArcadeDrive());
+
     _rghtFront.configFactoryDefault();
     _rghtFollower.configFactoryDefault();
     _leftFront.configFactoryDefault();
@@ -141,7 +144,4 @@ public class DriveSystem extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void initDefaultCommand() {
-    setDefaultCommand(new ArcadeDrive());
-  }
 }

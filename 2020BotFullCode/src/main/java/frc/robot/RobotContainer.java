@@ -8,34 +8,39 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.subsystems.ControlPanelSystem;
 import frc.robot.subsystems.DriveSystem;
+import frc.robot.subsystems.ElevatorSystem;
 import frc.robot.subsystems.IntakeSystem;
 import frc.robot.subsystems.LauncherSystem;
 import frc.robot.subsystems.RevolverSystem;
 import frc.robot.Constants;
 import frc.robot.commands.ArcadeDrive;
+import frc.robot.commands.AutoLaunch;
+import frc.robot.commands.ExtendLift;
 import frc.robot.commands.SetDriveSpeedCoef;
 import frc.robot.commands.SetIntake;
 import frc.robot.commands.SetLauncher;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
-/**
- * This class is where the bulk of the robot should be declared.  Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls).  Instead, the structure of the robot
- * (including subsystems, commands, and button mappings) should be declared here.
- */
+
 public class RobotContainer {
   
-  private XboxController m_controller0 = new XboxController(0);
+  //Controllers
+  private XboxController m_controller = new XboxController(Constants.kControllerChannel);
+  private Joystick m_joystick = new Joystick(Constants.kJoystickChannel);
 
-  // The robot's subsystems and commands are defined here...
+  // Subsystems
   public static DriveSystem driveSystem = new DriveSystem();
   public static IntakeSystem intakeSystem = new IntakeSystem();
   public static RevolverSystem revolverSystem = new RevolverSystem();
   public static LauncherSystem launcherSystem = new LauncherSystem();
+  public static ElevatorSystem elevatorSystem = new ElevatorSystem();
+  public static ControlPanelSystem controlPanelSystem = new ControlPanelSystem();
 
+  //Commands
   public static ArcadeDrive arcadeDrive = new ArcadeDrive();
   public static SetDriveSpeedCoef setDriveSlow = new SetDriveSpeedCoef(Constants.kDriveSlow);
   public static SetDriveSpeedCoef setDriveFast = new SetDriveSpeedCoef(Constants.kDriveFast);
@@ -43,34 +48,37 @@ public class RobotContainer {
   public static SetIntake stopIntake = new SetIntake(false);
   public static SetLauncher startLauncher = new SetLauncher(true);
   public static SetLauncher stopLauncher = new SetLauncher(false);
+  public static AutoLaunch startAutoEject = new AutoLaunch(true);
+  public static AutoLaunch stopAutoEject = new AutoLaunch(false);
+  public static ExtendLift extendLift = new ExtendLift();
 
-  /**
-   * The container for the robot.  Contains subsystems, OI devices, and commands.
-   */
+
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings.  Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a
-   * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
+  // Configure the button bindings
   private void configureButtonBindings() {
 
-    JoystickButton leftBumper = new JoystickButton(m_controller0, Constants.kLeftBumper);
-    JoystickButton rightBumper = new JoystickButton(m_controller0, Constants.kRightBumper);
-    JoystickButton buttonA = new JoystickButton(m_controller0, Constants.kButtonA);
-    JoystickButton buttonB = new JoystickButton(m_controller0, Constants.kButtonB);
+    // Define all necessary buttons
+    JoystickButton leftBumper = new JoystickButton(m_controller, Constants.kLeftBumper);
+    JoystickButton rightBumper = new JoystickButton(m_controller, Constants.kRightBumper);
+    JoystickButton buttonA = new JoystickButton(m_controller, Constants.kButtonA);
+    JoystickButton buttonB = new JoystickButton(m_controller, Constants.kButtonB);
+    JoystickButton trigger = new JoystickButton(m_joystick, Constants.kJoystickTrigger);
+    JoystickButton joystick11 = new JoystickButton(m_joystick, Constants.kJoystickButton11);
 
+    // Bind buttons to commands
     leftBumper.whenPressed(setDriveSlow);
     rightBumper.whenPressed(setDriveFast);
     buttonA.whenPressed(startIntake);
     buttonA.whenReleased(stopIntake);
     buttonB.whenPressed(startLauncher);
     buttonB.whenReleased(stopLauncher);
+    trigger.whenPressed(startAutoEject);
+    trigger.whenReleased(stopAutoEject);
+    joystick11.whenPressed(extendLift);
 
   }
 
