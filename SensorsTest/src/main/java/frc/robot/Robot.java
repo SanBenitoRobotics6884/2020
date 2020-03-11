@@ -26,7 +26,7 @@ import com.revrobotics.ColorSensorV3;
  * project.
  */
 public class Robot extends TimedRobot {
-  private AnalogInput ultrasonic = new AnalogInput(0);
+  private AnalogInput potentiometer = new AnalogInput(0);
   private DigitalInput limitSwitch = new DigitalInput(0);
   private final I2C.Port i2cPort = I2C.Port.kOnboard;
   private final ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
@@ -103,7 +103,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Proximity", proximity);
     SmartDashboard.putBoolean("Limit Switch", limitSwitch.get());
 
-    SmartDashboard.putNumber("Ultrasonic", ultrasonic.getVoltage() * 5.55);
+    SmartDashboard.putNumber("Pot", potentiometer.getVoltage() * 100);
 
     // Set IMU settings
     if (m_configCal) {

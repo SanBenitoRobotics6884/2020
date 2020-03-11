@@ -65,7 +65,7 @@ public class RevolverOperator extends CommandBase {
 
       return returnAngle;
 
-  }
+    }
 
   public RevolverOperator() {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -82,7 +82,7 @@ public class RevolverOperator extends CommandBase {
   @Override
   public void execute() {
 
-    m_fixedPot = RobotContainer.revolverSystem.getPotAngle();
+    m_fixedPot = RobotContainer.revolverSystem.getPotAngle() * 100;
     
     if (RobotContainer.intakeSystem.getStatus() && RobotContainer.launcherSystem.isHome()) {
       RobotContainer.revolverSystem.setTarget(findTargetChamberAngle(false, m_fixedPot));

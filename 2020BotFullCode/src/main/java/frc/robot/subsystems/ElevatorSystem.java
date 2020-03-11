@@ -21,13 +21,13 @@ public class ElevatorSystem extends SubsystemBase {
   private WPI_TalonSRX m_rightMotor = new WPI_TalonSRX(Constants.kLiftMotorRight);
 
   private Servo m_leftServo = new Servo(Constants.kLiftServoLeft);
-  private Servo m_rightServo = new Servo(Constants.kLiftServoLeft);
+  private Servo m_rightServo = new Servo(Constants.kLiftServoRight);
 
   private DigitalInput m_leftMin = new DigitalInput(Constants.kLimitSwitchLiftMinLeft);
   private DigitalInput m_rightMin = new DigitalInput(Constants.kLimitSwitchLiftMinRight);
 
-  private boolean m_lServoExtended = false;
-  private boolean m_rServoExtended = false;
+  private boolean m_lServoExtended = true;
+  private boolean m_rServoExtended = true;
   private double m_lSpeed = 0;
   private double m_rSpeed = 0;
   private boolean m_enableManual = false;
@@ -59,9 +59,9 @@ public class ElevatorSystem extends SubsystemBase {
   public void setLServo(boolean extended) {
 
     if (extended) {
-      m_leftServo.setSpeed(1);
+      m_leftServo.setSpeed(Constants.kServoExtend);
     } else {
-      m_leftServo.setSpeed(-1);
+      m_rightServo.setSpeed(Constants.kServoRetract);
     }
 
   }
@@ -69,9 +69,9 @@ public class ElevatorSystem extends SubsystemBase {
   public void setRServo(boolean extended) {
 
     if (extended) {
-      m_rightServo.setSpeed(1);
+      m_leftServo.setSpeed(Constants.kServoExtend);
     } else {
-      m_rightServo.setSpeed(-1);
+      m_leftServo.setSpeed(Constants.kServoRetract);
     }
     
   }
@@ -104,8 +104,6 @@ public class ElevatorSystem extends SubsystemBase {
 
   public ElevatorSystem() {
 
-    setDefaultCommand(new ManualElevatorControl());
-
     m_leftMotor.configFactoryDefault();
     m_rightMotor.configFactoryDefault();
 
@@ -134,6 +132,12 @@ public class ElevatorSystem extends SubsystemBase {
     } else {
       m_rightMotor.set(0);
     }
+
+  }
+
+  public void initDefaultCommand() {
+
+    setDefaultCommand(new ManualElevatorControl());
 
   }
 
