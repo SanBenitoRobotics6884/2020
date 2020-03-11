@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
@@ -31,80 +30,99 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot { //Sensor out of phase
 
+  /* Device Channel Constants */
   private static final int kRevolverMotor = 8;
   private static final int kIntakeMotor = 6;
   private static final int kLauncherMotor = 4;
   private static final int kEjectorMotor = 7;
   private static final int kPotChannel = 0;
+  private static final int kEjectorLS = 1;
+  private static final int kIntakeLS = 0;
+
+  /* General Constants */
   private static final double kEjectorSpeed = 0.15;
+  private static final double kIntakeSpeed = 0.7;
+  private static final double kLauncherSpeed = 0.75;
   private static final double kEjectDelay = 2;
   private static final double kRetractDelay = 1;
+  private static final double kRevolverTolerance = 1;
+  private static final double kSlow = 0.5;
+  private static final double kFast = 0.7;
+  private static final double kServoExtend = 0.5;
+  private static final double kRightServoRetract = 0.1;
+  private static final double kLeftServoRetract = -0.6125;
+  private static final double kLiftSpeed = 0.5;
+
+  /* PID Constants for Revolver */
   private static final double kP = 0.05;
   private static final double kI = 0.0;
   private static final double kD = 0.005;
+
+  /* Revolver Setpoints and Status */
   private static final double[] kIntakeSetPoints = {211, 221, 231, 241, 251};
   private static final double[] kLauncherSetPoints = {167, 177, 187, 197, 207}; //FIND SETPOINTS BEFORE USE
   private boolean[] m_chamberStatus = {false, false, false, false, false};
 
-  private PIDController m_pidController;
-  private AnalogInput m_potentiometer = new AnalogInput(kPotChannel);
+  /* Initialize all motor controllers */
+  private WPI_TalonSRX _rghtFront = new WPI_TalonSRX(1);
+  private WPI_VictorSPX _rghtFollower = new WPI_VictorSPX(10);
+  private WPI_TalonSRX _leftFront = new WPI_TalonSRX(2);
+  private WPI_VictorSPX _leftFollower = new WPI_VictorSPX(20);
   private WPI_VictorSPX m_revolverMotor = new WPI_VictorSPX(kRevolverMotor);
   private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(kIntakeMotor);
   private WPI_VictorSPX m_launcherMotor = new WPI_VictorSPX(kLauncherMotor);
   private WPI_VictorSPX m_pusherMotor = new WPI_VictorSPX(kEjectorMotor);
-  private DigitalInput ejectorLimit = new DigitalInput (1);
-  private DigitalInput intakeLimit = new DigitalInput (0);
-  private Joystick m_joystick = new Joystick(0);
+  private WPI_VictorSPX m_leftLiftMotor = new WPI_VictorSPX(5);
+  private WPI_VictorSPX m_rightLiftMotor = new WPI_VictorSPX(3);
+
+  /* Create differential drive with master talons */
+  private DifferentialDrive _diffDrive = new DifferentialDrive(_leftFront, _rghtFront);
+
+  /* Initialize Limit Switches */
+  private DigitalInput ejectorLimit = new DigitalInput (kEjectorLS);
+  private DigitalInput intakeLimit = new DigitalInput (kIntakeLS);
+
+  /* Initialize Servos for Lift */
+  private Servo m_leftServo = new Servo(0);
+  private Servo m_rightServo = new Servo(1);
+
+  /* Initialize Joysticks and Gamepads */
+  private Joystick m_joystick = new Joystick(0); // Joystick
+  private Joystick m_controller = new Joystick(1); // Gamepad
+
+  /*Misc Initializations */
+  private PIDController m_pidController;
+  private AnalogInput m_potentiometer = new AnalogInput(kPotChannel);
   private Timer timer = new Timer();
+
+  /* Initialize Target Delays for Ejector */
   private double ejectDelayTarget = 0;
   private double retractDelayTarget = 0;
+
+  /* Misc Definitions */
   private boolean retracting;
-
-  WPI_TalonSRX _rghtFront = new WPI_TalonSRX(1);
-  WPI_VictorSPX _rghtFollower = new WPI_VictorSPX(10);
-  WPI_TalonSRX _leftFront = new WPI_TalonSRX(2);
-  WPI_VictorSPX _leftFollower = new WPI_VictorSPX(20);
-
-  DifferentialDrive _diffDrive = new DifferentialDrive(_leftFront, _rghtFront);
-
-  Joystick m_controller = new Joystick(1);
-
-  Faults _faults_L = new Faults();
-  Faults _faults_R = new Faults();
-
-  private double kSlow = 0.5;
-  private double kFast = 0.7;
-  private  double scale = kSlow;
-
-  double kServoExtend = 0.5;
-  double kRightServoRetract = 0.1;
-  double kLeftServoRetract = -0.6125;
-  double kLiftSpeed = 0.5;
-  boolean mServoExtend = true;
-
-  WPI_VictorSPX m_leftLiftMotor = new WPI_VictorSPX(5);
-  WPI_VictorSPX m_rightLiftMotor = new WPI_VictorSPX(3);
-
-  //Spark m_leftLiftMotor = new Spark(2);
-  //Spark m_rightLiftMotor = new Spark(3);
-
-  Servo m_leftServo = new Servo(0);
-  Servo m_rightServo = new Servo(1);
-
+  private boolean mServoExtend = true;
+  private boolean intakeRunning = false;
+  private double scale = kSlow;
   private double pidOut;
   private double fixedPot;
-  private boolean intakeRunning = false;
-  private int targetChamber;
   private double targetAngle;
+  private int targetChamber;
 
+  /* Function that updates targetChamber and targetAngle variables
+     using the current angle of the revolver and whether it should
+     target the launcher or the intake, finding the closest viable
+     slot to rotate to */
   private void findTargetChamberAngle (boolean targetLauncher, double currentAngle) {
 
     int returnChamber = 0;
     double returnAngle = 0;
 
+    /* Loops through each revolver slot index to find the closest valid
+       chamber & angle to the current angle, and updates the values */
     for (int i = 0; i < m_chamberStatus.length; i++) {
 
-      if (targetLauncher) {
+      if (targetLauncher) { //Uses Launcher Setpoints if Launcher is targeted
 
         if ( !m_chamberStatus[returnChamber] && m_chamberStatus[i] ) {
           returnChamber = i;
@@ -115,7 +133,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
           returnChamber = i;
         }
 
-      } else {
+      } else { //Uses Intake Setpoints if Intake Targeted
 
         if ( m_chamberStatus[returnChamber] && !m_chamberStatus[i] ) {
           returnChamber = i;
@@ -134,6 +152,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
         returnAngle = kIntakeSetPoints[returnChamber];
       }
 
+      /* Updates Angle and Chamber */
       targetChamber = returnChamber;
       targetAngle = returnAngle;
 
@@ -145,7 +164,10 @@ public class Robot extends TimedRobot { //Sensor out of phase
   @Override
   public void robotInit() {
 
+    /* Creates PID Controller with our PID Constants */
     m_pidController = new PIDController(kP, kI, kD);
+
+    /* Starts timer for autonomous and other time-based things */
     timer.start();
 
     /* factory default values */
@@ -155,27 +177,25 @@ public class Robot extends TimedRobot { //Sensor out of phase
     _leftFollower.configFactoryDefault();
     m_leftLiftMotor.configFactoryDefault();
     m_rightLiftMotor.configFactoryDefault();
+    m_revolverMotor.configFactoryDefault();
+    m_intakeMotor.configFactoryDefault();
+    m_launcherMotor.configFactoryDefault();
+    m_pusherMotor.configFactoryDefault();
 
     /* set up followers */
     _rghtFollower.follow(_rghtFront);
     _leftFollower.follow(_leftFront);
 
     /* [3] flip values so robot moves forward when stick-forward/LEDs-green */
-    _rghtFront.setInverted(true); // !< Update this
-    _leftFront.setInverted(false); // !< Update this
+    m_pusherMotor.setInverted(false);
+    m_revolverMotor.setInverted(true);
+    _rghtFront.setInverted(true);
+    _leftFront.setInverted(false);
     m_leftLiftMotor.setInverted(true);
 
-    /*
-     * set the invert of the followers to match their respective master controllers
-     */
+    /* Set the invert of the followers to match their respective master controllers */
     _rghtFollower.setInverted(InvertType.FollowMaster);
     _leftFollower.setInverted(InvertType.FollowMaster);
-
-    /*
-     * [4] adjust sensor phase so sensor moves positive when Talon LEDs are green
-     */
-    _rghtFront.setSensorPhase(true);
-    _leftFront.setSensorPhase(true);
 
     /*
      * WPI drivetrain classes defaultly assume left and right are opposite. call
@@ -183,15 +203,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
      */
     _diffDrive.setRightSideInverted(false);
 
-    m_revolverMotor.configFactoryDefault();
-    m_intakeMotor.configFactoryDefault();
-    m_launcherMotor.configFactoryDefault();
-    m_pusherMotor.configFactoryDefault();
-    m_pusherMotor.setInverted(false);
-    m_revolverMotor.setInverted(true);
-
-    m_revolverMotor.setSensorPhase(true);
-
+    /* Set bounds of Servos as specified by manufacturer */
     m_leftServo.setBounds(2.0, 1.8, 1.5, 1.2, 1.0);
     m_rightServo.setBounds(2.0, 1.8, 1.5, 1.2, 1.0);
   }
@@ -206,6 +218,29 @@ public class Robot extends TimedRobot { //Sensor out of phase
    */
   @Override
   public void robotPeriodic() {
+    /* Update variables based on controller input */
+    intakeRunning = m_joystick.getRawButton(2);
+    fixedPot = m_potentiometer.getAverageVoltage() * 100;
+    if (m_controller.getRawButton(5)) {
+      scale = kSlow;
+    }
+    if (m_controller.getRawButton(6)) {
+      scale = kFast;
+    }
+    if (m_joystick.getRawButton(11)) {
+      mServoExtend = false;
+    } else if (m_joystick.getRawButton(9)) {
+      mServoExtend = true;
+    }
+
+    /* Put debug data on SmartDashboard/Shuffleboard */
+    SmartDashboard.putBoolean("Chamber 1", m_chamberStatus[0]);
+    SmartDashboard.putBoolean("Chamber 2", m_chamberStatus[1]);
+    SmartDashboard.putBoolean("Chamber 3", m_chamberStatus[2]);
+    SmartDashboard.putBoolean("Chamber 4", m_chamberStatus[3]);
+    SmartDashboard.putBoolean("Chamber 5", m_chamberStatus[4]);
+    SmartDashboard.putNumber("Pot", fixedPot);
+    SmartDashboard.putNumber("PID Out", pidOut);
   }
 
   /**
@@ -247,44 +282,18 @@ public class Robot extends TimedRobot { //Sensor out of phase
         turn = 0;
     }
 
-    if (m_controller.getRawButton(5)) {
-      scale = kSlow;
-    }
-    if (m_controller.getRawButton(6)) {
-      scale = kFast;
-    }
-
     /* drive robot */
     _diffDrive.arcadeDrive(forw, turn);
-
-    /*
-      * drive motor at least 25%, Talons will auto-detect if sensor is out of phase
-      */
-    _leftFront.getFaults(_faults_L);
-    _rghtFront.getFaults(_faults_R);
-
-    SmartDashboard.putBoolean("Chamber 1", m_chamberStatus[0]);
-    SmartDashboard.putBoolean("Chamber 2", m_chamberStatus[1]);
-    SmartDashboard.putBoolean("Chamber 3", m_chamberStatus[2]);
-    SmartDashboard.putBoolean("Chamber 4", m_chamberStatus[3]);
-    SmartDashboard.putBoolean("Chamber 5", m_chamberStatus[4]);
-    intakeRunning = m_joystick.getRawButton(2);
-
-    fixedPot = m_potentiometer.getAverageVoltage() * 100;
 
     pidOut = m_pidController.calculate(fixedPot);
     //m_revolverMotor.set(pidOut * Math.abs(m_joystick.getY())); /*CHECK IF SENSOR IN PHASE BEFORE UNCOMMENTING*/
 
-    if (!intakeLimit.get() && Math.abs(targetAngle - fixedPot) < 2) {
-      findTargetChamberAngle(false, fixedPot);
-      m_chamberStatus[targetChamber] = true;
-    }
-
+    /* Intake, Launcher, Revolver behaviour set depending on intake status */
     if (intakeRunning) {
       findTargetChamberAngle(false, fixedPot);
       m_pidController.setSetpoint(targetAngle);
       SmartDashboard.putNumber("Target Chamber", targetChamber);
-      if (m_joystick.getRawAxis(3) < 0) m_intakeMotor.set(0.7);
+      if (m_joystick.getRawAxis(3) < 0) m_intakeMotor.set(kIntakeSpeed);
     } else {
       findTargetChamberAngle(true, fixedPot);
       m_pidController.setSetpoint(targetAngle);
@@ -292,18 +301,26 @@ public class Robot extends TimedRobot { //Sensor out of phase
       m_intakeMotor.set(0);
     }
 
+    /* If limit switch on the intake is triggered and revolver is in place, update revolver status */
+    if (!intakeLimit.get() && Math.abs(targetAngle - fixedPot) < kRevolverTolerance) {
+      findTargetChamberAngle(false, fixedPot);
+      m_chamberStatus[targetChamber] = true;
+    }
+
+    /* Start launching sequence when trigger pressed */
     if (m_joystick.getTrigger()) {
-      m_launcherMotor.set(0.75);
-      //AutoLaunch
-      if (timer.get() > ejectDelayTarget) {
+      m_launcherMotor.set(kLauncherSpeed);
+      /* Auto Launch based on time and soft limits */
+      if (timer.get() > ejectDelayTarget && Math.abs(targetAngle - fixedPot) < kRevolverTolerance) {
         ejectDelayTarget = timer.get() + kEjectDelay;
         m_pusherMotor.set(kEjectorSpeed);
       }
     } else {
       m_launcherMotor.set(0);
-      ejectDelayTarget = timer.get() + 1;
+      ejectDelayTarget = timer.get() + 1; // Creates initial delay for auto launch so flywheel can speed up
     }
 
+    /* When soft limit hit, stop ejector motor and set timer to update revolver slot */
     if (!ejectorLimit.get()) {
       m_pusherMotor.set(0);
       retracting = true;
@@ -311,24 +328,18 @@ public class Robot extends TimedRobot { //Sensor out of phase
 
     }
 
+    /* If limit switch had been triggered and target time reached, update revolver slot */
     if (timer.get() > retractDelayTarget && retracting) {
       findTargetChamberAngle(true, fixedPot);
       m_chamberStatus[targetChamber] = false;
       retracting = false;
     }
 
-    SmartDashboard.putNumber("Pot", fixedPot);
-    SmartDashboard.putNumber("PID Out", pidOut);
-
+    /* Run lift motors based on joystick y, and isolate each side if specific buttons pressed */
     if (!m_joystick.getRawButton(4)) m_leftLiftMotor.set(m_joystick.getY() * kLiftSpeed);
     if (!m_joystick.getRawButton(3)) m_rightLiftMotor.set(m_joystick.getY() * kLiftSpeed);
 
-    if (m_joystick.getRawButton(11)) {
-      mServoExtend = false;
-    } else if (m_joystick.getRawButton(9)) {
-      mServoExtend = true;
-    }
-
+    /* Extends / Retracts Servos */
     if (mServoExtend) {
       m_leftServo.setSpeed(kServoExtend);
       m_rightServo.setSpeed(kServoExtend);
