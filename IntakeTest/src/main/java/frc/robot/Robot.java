@@ -22,7 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends TimedRobot {
 
-  private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(3);
+  private WPI_VictorSPX m_intakeMotor = new WPI_VictorSPX(6);
   //private Spark m_motor2 = new Spark(1);
   private Joystick m_controller = new Joystick(0);
   double m_speedCoefficient = 0.7;

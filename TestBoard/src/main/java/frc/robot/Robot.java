@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
+/* Copyright (c) 2018 FIRST. All Rights Reserved.                             7*/
 /* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
 /* the project.                                                               */
@@ -7,9 +7,12 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /**
@@ -21,8 +24,13 @@ import edu.wpi.first.wpilibj.TimedRobot;
  */
 public class Robot extends TimedRobot {
 
+  private static int kMotorID = 7;
+  private static double kSpeed = 0.15;
+  private static boolean kInvert = false;
+
   private Joystick m_controller = new Joystick(0);
-  private Servo actuator = new Servo(0);
+  private WPI_VictorSPX m_pusher = new WPI_VictorSPX(kMotorID);
+  private DigitalInput ls = new DigitalInput (1);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -30,7 +38,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    actuator.setBounds(2.0, 1.8, 1.5, 1.2, 1.0);
+    m_pusher.configFactoryDefault();
+    m_pusher.setInverted(kInvert);
   }
 
   @Override
@@ -46,12 +55,20 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void robotPeriodic() {
+  public void robotPeriodic() {   
 
-    if (m_controller.getTrigger()) {
-      actuator.setSpeed(1);
-    } else {
-      actuator.setSpeed(-1);
+    SmartDashboard.putBoolean("LS", !ls.get());
+    
+    if (m_controller.getRawButton(1)) {
+      m_pusher.set(kSpeed);
+    }
+
+    if (m_controller.getRawButton(2)) {
+      m_pusher.set(0);
+    }
+
+    if (!ls.get()) {
+      m_pusher.set(0);
     }
 
   }

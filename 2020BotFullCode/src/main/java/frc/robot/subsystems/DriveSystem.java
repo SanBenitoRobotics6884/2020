@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.commands.ArcadeDrive;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class DriveSystem extends SubsystemBase {
   
@@ -27,7 +28,7 @@ public class DriveSystem extends SubsystemBase {
 
   private DifferentialDrive _diffDrive = new DifferentialDrive(_leftFront, _rghtFront);
 
-  private final ADIS16448_IMU m_imu = new ADIS16448_IMU();
+  //private final ADIS16448_IMU m_imu = new ADIS16448_IMU();
   private ADIS16448_IMU.IMUAxis m_yawActiveAxis;
   private PIDController m_pidController;
 
@@ -68,8 +69,6 @@ public class DriveSystem extends SubsystemBase {
   }
 
   public DriveSystem() {
-    
-    setDefaultCommand(new ArcadeDrive());
 
     _rghtFront.configFactoryDefault();
     _rghtFollower.configFactoryDefault();
@@ -102,12 +101,12 @@ public class DriveSystem extends SubsystemBase {
       */
     _diffDrive.setRightSideInverted(false);
     
-    m_imu.configCalTime(8);
-    m_imu.reset();
-    m_imu.calibrate();
+    //m_imu.configCalTime(8);
+    //m_imu.reset();
+    //m_imu.calibrate();
     m_pidController = new PIDController(kP, kI, kD);
     m_pidController.enableContinuousInput(0, 360); //CHECK OUTPUT RANGE
-    m_yawActiveAxis = ADIS16448_IMU.IMUAxis.kZ;
+    //m_yawActiveAxis = ADIS16448_IMU.IMUAxis.kZ;
 
   }
 
@@ -135,13 +134,19 @@ public class DriveSystem extends SubsystemBase {
   public void GyroDrive (double targetAngle, double forw) {
     m_speed = forw * kSpeed;
     m_pidController.setSetpoint(targetAngle);
-    pidOut = m_pidController.calculate(m_imu.getAngle());
+   // pidOut = m_pidController.calculate(m_imu.getAngle());
     _diffDrive.arcadeDrive(m_speed, pidOut);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  public void initDefaultCommand() {
+
+    setDefaultCommand(new ArcadeDrive());
+
   }
 
 }

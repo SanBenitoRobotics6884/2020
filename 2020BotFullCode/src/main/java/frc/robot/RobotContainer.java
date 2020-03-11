@@ -10,7 +10,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import frc.robot.subsystems.ControlPanelSystem;
 import frc.robot.subsystems.DriveSystem;
 import frc.robot.subsystems.ElevatorSystem;
 import frc.robot.subsystems.IntakeSystem;
@@ -38,10 +37,8 @@ public class RobotContainer {
   public static RevolverSystem revolverSystem = new RevolverSystem();
   public static LauncherSystem launcherSystem = new LauncherSystem();
   public static ElevatorSystem elevatorSystem = new ElevatorSystem();
-  public static ControlPanelSystem controlPanelSystem = new ControlPanelSystem();
 
   //Commands
-  public static ArcadeDrive arcadeDrive = new ArcadeDrive();
   public static SetDriveSpeedCoef setDriveSlow = new SetDriveSpeedCoef(Constants.kDriveSlow);
   public static SetDriveSpeedCoef setDriveFast = new SetDriveSpeedCoef(Constants.kDriveFast);
   public static SetIntake startIntake = new SetIntake(true);

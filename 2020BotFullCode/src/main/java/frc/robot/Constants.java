@@ -24,14 +24,15 @@ public final class Constants {
     public static final double kDriveTurnGain = 1;
     public static final double kGyroDriveTurnGain = 1;
     public static final double kDriveSpeedDefault = 0.5;
-    public static final double kIntakeSpeed = 0.4;
+    public static final double kIntakeSpeed = 0.6;
     public static final double kLauncherSpeed = 0.5;
     public static final double kLSUpdateDelay = 1;
     public static final double kEjectorSpeed = 0.1;
     public static final double kAutoEjectDelay = 2;
-    public static final double kLiftSpeed = 0.5;
-    public static final double kControlPanelSpeed = 0.2;
-    public static final boolean kLiftServoDefaultState = false;
+    public static final double kLiftSpeed = 0.4;
+    public static final boolean kLiftServoDefaultState = true;
+    public static final double kServoExtend = 0.5;
+    public static final double kServoRetract = -0.5;
 
     //Controllers & Input
     public static final int kControllerChannel = 1;
@@ -46,7 +47,6 @@ public final class Constants {
     public static final int kButtonB = 2;
     public static final int kJoystickTrigger = 1;
     public static final int kJoystickButton11 = 11;
-    public static final int kControlPanelDirectAxis = 4;
 
     //Motor Controller Channels
     public static final int kLeftDriveMaster = 2; //Talon SRX, CAN
