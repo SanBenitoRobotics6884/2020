@@ -52,6 +52,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
   private static final double kRightServoRetract = 0.1;
   private static final double kLeftServoRetract = -0.6125;
   private static final double kLiftSpeed = 0.5;
+  private static final double kAutonomousSpeed = 0.2;
 
   /* PID Constants for Revolver */
   private static final double kP = 0.05;
@@ -96,6 +97,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
   private Timer timer = new Timer();
 
   /* Initialize Target Delays for Ejector */
+  private double autonomousTarget = 0;
   private double ejectDelayTarget = 0;
   private double retractDelayTarget = 0;
 
@@ -256,6 +258,7 @@ public class Robot extends TimedRobot { //Sensor out of phase
    */
   @Override
   public void autonomousInit() {
+    autonomousTarget = timer.get() + kAutonomousDelay;
   }
 
   /**
@@ -263,6 +266,9 @@ public class Robot extends TimedRobot { //Sensor out of phase
    */
   @Override
   public void autonomousPeriodic() {
+    if(timer.get() < autonomousTarget){
+      _diffDrive.arcadeDrive(kAutonomousSpeed, 0);
+    }
   }
 
   /**
